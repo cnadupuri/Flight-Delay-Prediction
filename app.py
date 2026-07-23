@@ -352,24 +352,24 @@ if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_
 
     with col1:
         st.metric(
-#<<<<<<< HEAD
+
             label="✈️ Predicted Departure Delay",
             value=f"{departure_prediction:.2f} min"
-#=======
+
             "✈️ Predicted Departure Delay",
             f"{departure_prediction} min"
-#>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
+
         )
 
     with col2:
         st.metric(
-#<<<<<<< HEAD
+
             label="🛬 Predicted Arrival Delay",
             value=f"{arrival_prediction:.2f} min"
-#=======
+
             "🛬 Predicted Arrival Delay",
             f"{arrival_prediction} min"
-#>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
+
         )
 
     st.markdown("---")
