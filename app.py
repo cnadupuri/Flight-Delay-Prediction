@@ -350,7 +350,9 @@ if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_
 
     col1, col2 = st.columns(2)
 
-    with col1:
+    col1, col2 = st.columns(2)
+
+with col1:
     st.metric(
         label="✈️ Predicted Departure Delay",
         value=f"{departure_prediction:.2f} min"
@@ -361,7 +363,6 @@ with col2:
         label="🛬 Predicted Arrival Delay",
         value=f"{arrival_prediction:.2f} min"
     )
-
     st.markdown("---")
 
 #<<<<<<< HEAD
