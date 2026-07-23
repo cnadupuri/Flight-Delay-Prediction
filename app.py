@@ -322,7 +322,7 @@ for d in weekdays:
 # ===========================
 
 input_df = input_df.reindex(columns=feature_names, fill_value=0)
-<<<<<<< HEAD
+#<<<<<<< HEAD
 # ===========================
 # Prediction
 # ===========================
