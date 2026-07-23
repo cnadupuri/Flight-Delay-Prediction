@@ -21,7 +21,18 @@ st.set_page_config(
 )
 
 st.title("✈️ Flight Delay Prediction System")
+<<<<<<< HEAD
 st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
+=======
+st.caption("Machine Learning | XGBoost | Streamlit")
+st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
+st.set_page_config(
+    page_title="Flight Delay Prediction",
+    page_icon="✈️",
+    layout="wide"
+)
+st.sidebar.success("Fill in the flight details below.")
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
 
 st.sidebar.header("Flight Details")
 
@@ -311,6 +322,7 @@ for d in weekdays:
 # ===========================
 
 input_df = input_df.reindex(columns=feature_names, fill_value=0)
+<<<<<<< HEAD
 # ===========================
 # Prediction
 # ===========================
@@ -320,6 +332,17 @@ if st.button("Predict Flight Delay"):
     # Make Predictions
     departure_prediction = departure_model.predict(input_df)[0]
     arrival_prediction = arrival_model.predict(input_df)[0]
+=======
+# # ===========================
+# Prediction
+# ===========================
+
+if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_width=True):
+
+    # Make Predictions
+    departure_prediction = round(departure_model.predict(input_df)[0])
+    arrival_prediction = round(arrival_model.predict(input_df)[0])
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
 
     st.success("Prediction Completed Successfully!")
 
@@ -329,18 +352,29 @@ if st.button("Predict Flight Delay"):
 
     with col1:
         st.metric(
+<<<<<<< HEAD
             label="✈️ Predicted Departure Delay",
             value=f"{departure_prediction:.2f} min"
+=======
+            "✈️ Predicted Departure Delay",
+            f"{departure_prediction} min"
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
         )
 
     with col2:
         st.metric(
+<<<<<<< HEAD
             label="🛬 Predicted Arrival Delay",
             value=f"{arrival_prediction:.2f} min"
+=======
+            "🛬 Predicted Arrival Delay",
+            f"{arrival_prediction} min"
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
         )
 
     st.markdown("---")
 
+<<<<<<< HEAD
     # Delay Status
     if departure_prediction <= 0:
         st.success("✅ Flight is expected to depart on time.")
@@ -403,6 +437,61 @@ if st.button("Predict Flight Delay"):
     # Show input used for prediction
     with st.expander("View Input Features"):
         st.dataframe(input_df)
+=======
+    # ===========================
+    # Departure Status
+    # ===========================
+
+    st.subheader("✈️ Departure Status")
+
+    if departure_prediction <= 15:
+        st.success(f"🟢 Low Departure Delay: {departure_prediction} minutes")
+    elif departure_prediction <= 45:
+        st.warning(f"🟡 Moderate Departure Delay: {departure_prediction} minutes")
+    else:
+        st.error(f"🔴 High Departure Delay: {departure_prediction} minutes")
+
+    # ===========================
+    # Arrival Status
+    # ===========================
+
+    st.subheader("🛬 Arrival Status")
+
+    if arrival_prediction <= 15:
+        st.success(f"🟢 Low Arrival Delay: {arrival_prediction} minutes")
+    elif arrival_prediction <= 45:
+        st.warning(f"🟡 Moderate Arrival Delay: {arrival_prediction} minutes")
+    else:
+        st.error(f"🔴 High Arrival Delay: {arrival_prediction} minutes")
+
+    st.markdown("---")
+
+with st.expander("📋 Flight Details"):
+    
+    st.write(f"**From Airport:** {from_airport}")
+    st.write(f"**To Airport:** {to_airport}")
+    st.write(f"**Airline:** {airline}")
+    st.write(f"**Flight Category:** {category}")
+    st.write(f"**Weekday:** {weekday}")
+    st.write(f"**Weather:** {weather}")
+
+    st.write("---")
+
+    st.write(f"**Distance:** {distance} km")
+    st.write(f"**Passenger Load Factor:** {passenger_load}%")
+    st.write(f"**Airline Rating:** {airline_rating}")
+    st.write(f"**Airport Rating:** {airport_rating}")
+    st.write(f"**Market Share:** {market_share}")
+    st.write(f"**OTP Index:** {otp_index}")
+
+    st.write("---")
+
+    st.write(f"**Departure Time:** {departure_hour:02d}:{departure_minute:02d}")
+    st.write(f"**Arrival Time:** {arrival_hour:02d}:{arrival_minute:02d}")
+    st.write(f"**Date:** {day:02d}/{month:02d}/{year}")
+      # ===========================
+
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
       # ===========================
 # Sidebar Information
 # ===========================
@@ -475,4 +564,8 @@ st.info(
 
 st.markdown("---")
 
+<<<<<<< HEAD
 st.caption("© 2026 Flight Delay Prediction | Developed using Streamlit & XGBoost")
+=======
+st.caption("© 2026 Flight Delay Prediction | Developed using Streamlit & XGBoost")
+>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
