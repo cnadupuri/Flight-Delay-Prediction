@@ -23,7 +23,7 @@ st.set_page_config(
 st.title("✈️ Flight Delay Prediction System")
 #<<<<<<< HEAD
 st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
-=======
+#=======
 st.caption("Machine Learning | XGBoost | Streamlit")
 st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
 st.set_page_config(
