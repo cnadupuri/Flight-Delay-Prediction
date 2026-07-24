@@ -2,17 +2,16 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# ===========================
+
 # Load Models
-# ===========================
 
 departure_model = joblib.load("flight_departure_delay_model.pkl")
 arrival_model = joblib.load("flight_arrival_delay_model.pkl")
 feature_names = joblib.load("feature_names.pkl")
 
-# ===========================
+
 # Page Config
-# ===========================
+
 
 st.set_page_config(
     page_title="Flight Delay Prediction",
@@ -21,9 +20,9 @@ st.set_page_config(
 )
 
 st.title("✈️ Flight Delay Prediction System")
-#<<<<<<< HEAD
+
 st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
-#=======
+
 st.caption("Machine Learning | XGBoost | Streamlit")
 st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
 st.set_page_config(
@@ -32,13 +31,12 @@ st.set_page_config(
     layout="wide"
 )
 st.sidebar.success("Fill in the flight details below.")
-#>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
 
 st.sidebar.header("Flight Details")
 
-# ===========================
+
 # Flight Information
-# ===========================
+
 
 from_airport = st.sidebar.selectbox(
     "From Airport",
@@ -220,9 +218,9 @@ arrival_minute = st.sidebar.number_input(
     max_value=59,
     value=45
 )
-# ===========================
+
 # Create Input Dictionary
-# ===========================
+
 
 input_data = {
     "Distance": distance,
@@ -246,16 +244,14 @@ input_data = {
     "Departure_Minute": departure_minute
 }
 
-# ===========================
+
 # Create DataFrame
-# ===========================
+
 
 input_df = pd.DataFrame([input_data])
 
-# ===========================
-# One-Hot Encoding
-# ===========================
 
+#onehot encoding
 # From Airport
 input_df["From_BOM"] = 1 if from_airport == "BOM" else 0
 input_df["From_CCU"] = 1 if from_airport == "CCU" else 0
@@ -317,20 +313,15 @@ weekdays = [
 for d in weekdays:
     input_df[f"Weekday_{d}"] = 1 if weekday == d else 0
 
-# ===========================
+
 # Match Training Features
-# ===========================
 
 input_df = input_df.reindex(columns=feature_names, fill_value=0)
-#<<<<<<< HEAD
-# ===========================
-# Prediction
-# ===========================
 
-
-# # ===========================
 # Prediction
-# ===========================
+
+# Prediction
+
 
 if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_width=True):
 
@@ -382,7 +373,6 @@ if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_
 # Prediction
 # ===========================
 
-if st.button("Predict Flight Delay"):
 
     # Make Predictions
     departure_prediction = departure_model.predict(input_df)[0]
