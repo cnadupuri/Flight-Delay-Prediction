@@ -1,5 +1,7 @@
 # Flight Delay Prediction — Professional Architecture Overview
 
+Click any implementation, model, training, or deployment component in the diagram to open its corresponding repository file.
+
 ```mermaid
 flowchart LR
 
@@ -19,8 +21,8 @@ flowchart LR
 
     %% Layer 3: Model inference
     subgraph ML["3. Prediction Layer"]
-        D["🤖 Departure Delay Model<br/><b>XGBoost Regressor</b>"]
-        R["🤖 Arrival Delay Model<br/><b>XGBoost Regressor</b>"]
+        D["🤖 Departure Delay Model<br/><b>XGBoost Regressor</b><br/>flight_departure_delay_model.pkl"]
+        R["🤖 Arrival Delay Model<br/><b>XGBoost Regressor</b><br/>flight_arrival_delay_model.pkl"]
     end
 
     %% Layer 4: Training and delivery
@@ -28,31 +30,41 @@ flowchart LR
         N["📓 Training Notebook<br/><b>airlines pred.ipynb</b>"]
         REQ["📦 Dependencies<br/><b>requirements.txt</b>"]
         DOCKER["🐳 Container Image<br/><b>Dockerfile</b>"]
-        CI["⚙️ GitHub Actions<br/><b>CI/CD Pipeline</b>"]
+        CI["⚙️ GitHub Actions<br/><b>ci.yml</b>"]
     end
 
-    %% Core workflow
-    U --> A
-    A --> I
-    I --> F
-    S --> F
-    A --> S
-    F --> D
-    F --> R
-    D --> P
-    R --> P
-    P --> A
+    %% Core prediction workflow
+    U -->|"uses"| A
+    A -->|"collects"| I
+    I -->|"prepared as"| F
+    S -->|"aligns feature ordering"| F
+    A -->|"loads schema"| S
+    F -->|"predicts with"| D
+    F -->|"predicts with"| R
+    D -->|"departure estimate"| P
+    R -->|"arrival estimate"| P
+    P -->|"rendered in app"| A
 
-    %% Training and artifact lifecycle
-    N -. trains .-> D
-    N -. trains .-> R
-    N -. generates .-> S
-    REQ -. configures .-> A
-    DOCKER --> A
-    DOCKER --> D
-    DOCKER --> R
-    DOCKER --> REQ
-    CI --> DOCKER
+    %% Training, packaging, and deployment relationships
+    N -.->|"trains"| D
+    N -.->|"trains"| R
+    N -.->|"generates"| S
+    REQ -.->|"configures runtime"| A
+    DOCKER -->|"packages"| A
+    DOCKER -->|"packages"| D
+    DOCKER -->|"packages"| R
+    DOCKER -->|"installs"| REQ
+    CI -->|"builds or deploys"| DOCKER
+
+    %% Clickable repository links
+    click A "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/app.py" "Open Streamlit application"
+    click S "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/feature_names.pkl" "Open feature schema"
+    click D "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/flight_departure_delay_model.pkl" "Open departure delay model"
+    click R "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/flight_arrival_delay_model.pkl" "Open arrival delay model"
+    click N "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/airlines%20pred.ipynb" "Open training notebook"
+    click REQ "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/requirements.txt" "Open dependency manifest"
+    click DOCKER "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/Dockerfile" "Open Dockerfile"
+    click CI "https://github.com/cnadupuri/Flight-Delay-Prediction/blob/main/.github/workflows/ci.yml" "Open CI/CD workflow"
 
     %% Styling
     classDef user fill:#F8FAFC,stroke:#475569,stroke-width:2px,color:#0F172A;
@@ -73,4 +85,20 @@ flowchart LR
     style OPS fill:#F0FDF4,stroke:#22C55E,stroke-width:1.5px;
 ```
 
-This architecture captures the full lifecycle of the flight delay prediction system: the user submits flight inputs, the app prepares feature vectors using a schema, XGBoost models predict departure and arrival delays, and the project is trained, packaged, and automated through Docker and GitHub Actions.
+## Architecture Layers
+
+- **User Experience:** Collects flight details and displays predictions through Streamlit.
+- **Feature Pipeline:** Applies the serialized feature schema to produce an aligned model input vector.
+- **Prediction Layer:** Uses separate XGBoost regressors for departure and arrival delay estimates.
+- **Training & Deployment:** Trains the models, manages dependencies, builds the container, and runs CI/CD automation.
+
+## Linked Components
+
+- [Streamlit application](app.py)
+- [Feature schema](feature_names.pkl)
+- [Departure delay model](flight_departure_delay_model.pkl)
+- [Arrival delay model](flight_arrival_delay_model.pkl)
+- [Training notebook](airlines%20pred.ipynb)
+- [Dependencies](requirements.txt)
+- [Dockerfile](Dockerfile)
+- [GitHub Actions workflow](.github/workflows/ci.yml)
