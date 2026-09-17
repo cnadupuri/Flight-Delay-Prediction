@@ -1,7 +1,5 @@
 # Flight Delay Prediction — Professional Architecture Overview
 
-Click any implementation, model, training, or deployment component in the diagram to open its corresponding repository file.
-
 ```mermaid
 flowchart LR
 
