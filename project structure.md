@@ -1,22 +1,19 @@
-🏗️ Repository Architecture
-flowchart TD
+# 🏗️ Repository Architecture
 
+```mermaid
+flowchart TD
     User([✈️ Flight User])
 
     App["📱 Streamlit App<br/>app.py"]
-
     Input["📝 Flight Details"]
     Features["🔢 Feature Vector"]
 
     Schema["📋 Feature Schema<br/>feature_names.pkl"]
-
     DepModel["🤖 Departure Delay Model<br/>XGBoost"]
     ArrModel["🤖 Arrival Delay Model<br/>XGBoost"]
-
     Prediction["📊 Delay Prediction"]
 
     Notebook["📓 Training Notebook<br/>airlines pred.ipynb"]
-
     Docker["🐳 Dockerfile"]
     Requirements["📦 requirements.txt"]
     CI["⚙️ GitHub Actions"]
@@ -30,10 +27,8 @@ flowchart TD
 
     Features --> DepModel
     Features --> ArrModel
-
     DepModel --> Prediction
     ArrModel --> Prediction
-
     Prediction --> App
 
     Notebook -. Trains .-> DepModel
@@ -45,7 +40,6 @@ flowchart TD
     Docker --> App
     Docker --> DepModel
     Docker --> ArrModel
-
     CI --> Docker
 
     classDef app fill:#DBEAFE,stroke:#2563EB,color:#000;
@@ -55,3 +49,4 @@ flowchart TD
     class App,Input,Features,Prediction app;
     class Schema,DepModel,ArrModel,Notebook model;
     class Docker,Requirements,CI infra;
+```
