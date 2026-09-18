@@ -1,42 +1,46 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import joblib
+from datetime import datetime
 
-
-# Load Models
-
-departure_model = joblib.load("flight_departure_delay_model.pkl")
-arrival_model = joblib.load("flight_arrival_delay_model.pkl")
-feature_names = joblib.load("feature_names.pkl")
-
-
-# Page Config
-
+# ============================================
+# PAGE CONFIG
+# ============================================
 
 st.set_page_config(
-    page_title="Flight Delay Prediction",
+    page_title="Flight Delay Prediction System",
     page_icon="✈️",
     layout="wide"
 )
 
-st.title("✈️ Flight Delay Prediction System")
+# ============================================
+# LOAD MODELS
+# ============================================
 
-st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
+@st.cache_resource
+def load_models():
+    departure_model = joblib.load("flight_departure_delay_model.pkl")
+    arrival_model = joblib.load("flight_arrival_delay_model.pkl")
+    feature_names = joblib.load("feature_names.pkl")
+    return departure_model, arrival_model, feature_names
 
-st.caption("Machine Learning | XGBoost | Streamlit")
-st.write("Predict both Departure Delay and Arrival Delay using Machine Learning.")
-st.set_page_config(
-    page_title="Flight Delay Prediction",
-    page_icon="✈️",
-    layout="wide"
+departure_model, arrival_model, feature_names = load_models()
+
+# ============================================
+# HEADER
+# ============================================
+
+st.title("✈️ Flight Delay Prediction Dashboard")
+st.markdown(
+    "Predict **Departure Delay** and **Arrival Delay** using Machine Learning."
 )
-st.sidebar.success("Fill in the flight details below.")
 
-st.sidebar.header("Flight Details")
+# ============================================
+# SIDEBAR
+# ============================================
 
-
-# Flight Information
-
+st.sidebar.header("✈️ Flight Information")
 
 from_airport = st.sidebar.selectbox(
     "From Airport",
@@ -78,7 +82,7 @@ weekday = st.sidebar.selectbox(
 )
 
 weather = st.sidebar.selectbox(
-    "Weather",
+    "Weather Condition",
     [
         "Cloudy",
         "Heavy rain",
@@ -102,23 +106,22 @@ weather = st.sidebar.selectbox(
     ]
 )
 
-st.sidebar.header("Flight Metrics")
+# ============================================
+# FLIGHT METRICS
+# ============================================
 
-distance = st.sidebar.number_input(
-    "Distance",
-    min_value=0,
-    value=1200
-)
+st.sidebar.header("📊 Flight Metrics")
+
+distance = st.sidebar.number_input("Distance (KM)", value=1200)
 
 passenger_load = st.sidebar.number_input(
-    "Passenger Load Factor",
-    min_value=0.0,
+    "Passenger Load Factor (%)",
     value=85.0
 )
 
 airline_rating = st.sidebar.number_input(
     "Airline Rating",
-    value=0.5
+    value=0.50
 )
 
 airport_rating = st.sidebar.number_input(
@@ -136,15 +139,19 @@ otp_index = st.sidebar.number_input(
     value=85.6
 )
 
-st.sidebar.header("Weather Details")
+# ============================================
+# WEATHER
+# ============================================
+
+st.sidebar.header("🌦 Weather Details")
 
 wind = st.sidebar.number_input(
-    "Wind Speed (Kmph)",
+    "Wind Speed",
     value=10
 )
 
 precip = st.sidebar.number_input(
-    "Precipitation (MM)",
+    "Precipitation",
     value=0
 )
 
@@ -168,7 +175,11 @@ cloudcover = st.sidebar.number_input(
     value=40
 )
 
-st.sidebar.header("Date")
+# ============================================
+# DATE
+# ============================================
+
+st.sidebar.header("📅 Date")
 
 year = st.sidebar.number_input(
     "Year",
@@ -189,7 +200,11 @@ day = st.sidebar.number_input(
     value=15
 )
 
-st.sidebar.header("Scheduled Time")
+# ============================================
+# TIME
+# ============================================
+
+st.sidebar.header("🕒 Schedule")
 
 departure_hour = st.sidebar.number_input(
     "Departure Hour",
@@ -219,8 +234,9 @@ arrival_minute = st.sidebar.number_input(
     value=45
 )
 
-# Create Input Dictionary
-
+# ============================================
+# INPUT DATAFRAME
+# ============================================
 
 input_data = {
     "Distance": distance,
@@ -239,37 +255,36 @@ input_data = {
     "Month": month,
     "Day": day,
     "Departure_Hour": departure_hour,
+    "Departure_Minute": departure_minute,
     "Arrival_Hour": arrival_hour,
     "Arrival_Minute": arrival_minute,
-    "Departure_Minute": departure_minute
 }
-
-
-# Create DataFrame
-
 
 input_df = pd.DataFrame([input_data])
 
+# ============================================
+# ENCODING
+# ============================================
 
-#onehot encoding
-# From Airport
 input_df["From_BOM"] = 1 if from_airport == "BOM" else 0
 input_df["From_CCU"] = 1 if from_airport == "CCU" else 0
 input_df["From_DEL"] = 1 if from_airport == "DEL" else 0
 
-# To Airport
 input_df["To_DEL"] = 1 if to_airport == "DEL" else 0
 input_df["To_HYD"] = 1 if to_airport == "HYD" else 0
 
-# Airline
-input_df["Airline_Air India"] = 1 if airline == "Air India" else 0
-input_df["Airline_Go Air"] = 1 if airline == "Go Air" else 0
-input_df["Airline_Indigo"] = 1 if airline == "Indigo" else 0
-input_df["Airline_SpiceJet"] = 1 if airline == "SpiceJet" else 0
-input_df["Airline_Spicejet"] = 1 if airline == "Spicejet" else 0
-input_df["Airline_Vistara"] = 1 if airline == "Vistara" else 0
+airlines = [
+    "Air India",
+    "Go Air",
+    "Indigo",
+    "SpiceJet",
+    "Spicejet",
+    "Vistara"
+]
 
-# Weather
+for a in airlines:
+    input_df[f"Airline_{a}"] = 1 if airline == a else 0
+
 weather_columns = [
     "Cloudy",
     "Heavy rain",
@@ -293,14 +308,15 @@ weather_columns = [
 ]
 
 for w in weather_columns:
-    col = f"weather__hourly__weatherDesc__value_{w}"
-    input_df[col] = 1 if weather == w else 0
+    input_df[f"weather__hourly__weatherDesc__value_{w}"] = (
+        1 if weather == w else 0
+    )
 
-# Category
 for i in [1, 2, 3, 4]:
-    input_df[f"Category_{i}"] = 1 if category == i else 0
+    input_df[f"Category_{i}"] = (
+        1 if category == i else 0
+    )
 
-# Weekday
 weekdays = [
     "Monday",
     "Tuesday",
@@ -311,234 +327,186 @@ weekdays = [
 ]
 
 for d in weekdays:
-    input_df[f"Weekday_{d}"] = 1 if weekday == d else 0
+    input_df[f"Weekday_{d}"] = (
+        1 if weekday == d else 0
+    )
 
+input_df = input_df.reindex(
+    columns=feature_names,
+    fill_value=0
+)
 
-# Match Training Features
+# ============================================
+# PREDICTION
+# ============================================
 
-input_df = input_df.reindex(columns=feature_names, fill_value=0)
+if st.button(
+    "✈️ Predict Flight Delay",
+    use_container_width=True
+):
 
-# Prediction
+    departure_delay = round(
+        departure_model.predict(input_df)[0],
+        2
+    )
 
-# Prediction
+    arrival_delay = round(
+        arrival_model.predict(input_df)[0],
+        2
+    )
 
+    weather_risk = round(
+        (
+            humidity * 0.25 +
+            wind * 0.30 +
+            precip * 0.30 +
+            cloudcover * 0.15
+        ),
+        2
+    )
 
-if st.button("✈️ Predict Flight Delay", key="predict_button", use_container_width=True):
+    route_score = round(
+        (
+            otp_index * 0.5 +
+            airline_rating * 20 +
+            airport_rating * 20
+        ),
+        2
+    )
 
-    # Make Predictions
-    departure_prediction = round(departure_model.predict(input_df)[0])
-    arrival_prediction = round(arrival_model.predict(input_df)[0])
-#>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
+    overall_risk = round(
+        (departure_delay + arrival_delay) / 2,
+        2
+    )
 
-    st.success("Prediction Completed Successfully!")
+    st.success("Prediction Completed Successfully ✅")
 
     st.markdown("---")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
 
-    col1, col2 = st.columns(2)
+    col1.metric(
+        "✈️ Departure Delay",
+        f"{departure_delay} min"
+    )
 
-    with col1:
-        
-        st.metric(
-         label="✈️ Predicted Departure Delay",
-         value=f"{departure_prediction:.2f} min"
-     )
+    col2.metric(
+        "🛬 Arrival Delay",
+        f"{arrival_delay} min"
+    )
 
-    with col2:
-        st.metric(
-           label="🛬 Predicted Arrival Delay",
-            value=f"{arrival_prediction:.2f} min"
-     )
+    col3.metric(
+        "🌦 Weather Risk",
+        weather_risk
+    )
+
+    col4.metric(
+        "📊 Route Score",
+        route_score
+    )
+
     st.markdown("---")
 
-#<<<<<<< HEAD
-    # Delay Status
-    if departure_prediction <= 0:
-        st.success("✅ Flight is expected to depart on time.")
+    st.subheader("🚦 Delay Risk Assessment")
+
+    if overall_risk <= 15:
+        st.success(
+            f"🟢 Low Delay Risk ({overall_risk} min)"
+        )
+    elif overall_risk <= 45:
+        st.warning(
+            f"🟡 Medium Delay Risk ({overall_risk} min)"
+        )
     else:
-        st.warning(f"⚠️ Expected Departure Delay: {departure_prediction:.2f} minutes")
-
-    if arrival_prediction <= 0:
-        st.success("✅ Flight is expected to arrive on time.")
-    else:
-        st.warning(f"⚠️ Expected Arrival Delay: {arrival_prediction:.2f} minutes")
-
-    st.markdown("---")
-
-    # Show input used for prediction
-    with st.expander("View Input Features"):
-        st.dataframe(input_df)
-      # ===========================
-# Prediction
-# ===========================
-
-
-    # Make Predictions
-    departure_prediction = departure_model.predict(input_df)[0]
-    arrival_prediction = arrival_model.predict(input_df)[0]
-
-    st.success("Prediction Completed Successfully!")
-
-    st.markdown("---")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.metric(
-            label="✈️ Predicted Departure Delay",
-            value=f"{departure_prediction:.2f} min"
+        st.error(
+            f"🔴 High Delay Risk ({overall_risk} min)"
         )
 
-    with col2:
-        st.metric(
-            label="🛬 Predicted Arrival Delay",
-            value=f"{arrival_prediction:.2f} min"
-        )
-
     st.markdown("---")
 
-    # Delay Status
-    if departure_prediction <= 0:
-        st.success("✅ Flight is expected to depart on time.")
-    else:
-        st.warning(f"⚠️ Expected Departure Delay: {departure_prediction:.2f} minutes")
+    st.subheader("📋 Flight Summary")
 
-    if arrival_prediction <= 0:
-        st.success("✅ Flight is expected to arrive on time.")
-    else:
-        st.warning(f"⚠️ Expected Arrival Delay: {arrival_prediction:.2f} minutes")
-
-    st.markdown("---")
-
-    # Show input used for prediction
-    with st.expander("View Input Features"):
-        st.dataframe(input_df)
-#=======
-    # ===========================
-    # Departure Status
-    # ===========================
-
-    st.subheader("✈️ Departure Status")
-
-    if departure_prediction <= 15:
-        st.success(f"🟢 Low Departure Delay: {departure_prediction} minutes")
-    elif departure_prediction <= 45:
-        st.warning(f"🟡 Moderate Departure Delay: {departure_prediction} minutes")
-    else:
-        st.error(f"🔴 High Departure Delay: {departure_prediction} minutes")
-
-    # ===========================
-    # Arrival Status
-    # ===========================
-
-    st.subheader("🛬 Arrival Status")
-
-    if arrival_prediction <= 15:
-        st.success(f"🟢 Low Arrival Delay: {arrival_prediction} minutes")
-    elif arrival_prediction <= 45:
-        st.warning(f"🟡 Moderate Arrival Delay: {arrival_prediction} minutes")
-    else:
-        st.error(f"🔴 High Arrival Delay: {arrival_prediction} minutes")
-
-    st.markdown("---")
-
-with st.expander("📋 Flight Details"):
-    
-    st.write(f"**From Airport:** {from_airport}")
-    st.write(f"**To Airport:** {to_airport}")
+    st.write(f"**Route:** {from_airport} → {to_airport}")
     st.write(f"**Airline:** {airline}")
-    st.write(f"**Flight Category:** {category}")
-    st.write(f"**Weekday:** {weekday}")
     st.write(f"**Weather:** {weather}")
+    st.write(f"**Distance:** {distance} KM")
 
-    st.write("---")
+    st.write(
+        f"**Departure:** "
+        f"{departure_hour:02d}:{departure_minute:02d}"
+    )
 
-    st.write(f"**Distance:** {distance} km")
-    st.write(f"**Passenger Load Factor:** {passenger_load}%")
-    st.write(f"**Airline Rating:** {airline_rating}")
-    st.write(f"**Airport Rating:** {airport_rating}")
-    st.write(f"**Market Share:** {market_share}")
-    st.write(f"**OTP Index:** {otp_index}")
+    st.write(
+        f"**Arrival:** "
+        f"{arrival_hour:02d}:{arrival_minute:02d}"
+    )
 
-    st.write("---")
+    st.markdown("---")
 
-    st.write(f"**Departure Time:** {departure_hour:02d}:{departure_minute:02d}")
-    st.write(f"**Arrival Time:** {arrival_hour:02d}:{arrival_minute:02d}")
-    st.write(f"**Date:** {day:02d}/{month:02d}/{year}")
-      # ===========================
+    report = pd.DataFrame({
+        "Prediction Time": [datetime.now()],
+        "From": [from_airport],
+        "To": [to_airport],
+        "Airline": [airline],
+        "Weather": [weather],
+        "Departure Delay": [departure_delay],
+        "Arrival Delay": [arrival_delay]
+    })
 
-#>>>>>>> 7acd34d (Updated Streamlit UI and flight delay prediction app)
-      # ===========================
-# Sidebar Information
-# ===========================
+    st.download_button(
+        label="📥 Download Prediction Report",
+        data=report.to_csv(index=False),
+        file_name="flight_prediction_report.csv",
+        mime="text/csv"
+    )
+
+    with st.expander("🔍 View Model Features"):
+        st.dataframe(input_df)
+
+# ============================================
+# SIDEBAR INFO
+# ============================================
 
 st.sidebar.markdown("---")
-st.sidebar.header("📌 Project Information")
 
 st.sidebar.info(
     """
-**Project:** Flight Delay Prediction
+### Project Information
 
-**Algorithms Used:**
-- Linear Regression
-- Random Forest
-- XGBoost (Final Model)
+**Model:** XGBoost
 
-**Framework:**
-- Streamlit
+**Framework:** Streamlit
+
+**Predictions:**
+- Departure Delay
+- Arrival Delay
 
 **Developer:**
-Chaitanya Nadupuri
+Chaitanya Nadapuri
 """
 )
 
-# ===========================
-# Main Page Information
-# ===========================
+# ============================================
+# FOOTER
+# ============================================
 
 st.markdown("---")
 
-st.subheader("📊 About this Project")
+st.subheader("📊 About Project")
 
 st.write("""
-This application predicts:
+This system predicts flight delays using
+historical airline, airport, route and
+weather data.
 
-- ✈️ Departure Delay
-- 🛬 Arrival Delay
-
-using a Machine Learning model trained on historical flight and weather data.
-
-The model considers:
-
-- Flight Route
-- Airline
-- Weather Conditions
-- Distance
-- Passenger Load Factor
-- Airline Rating
-- Airport Rating
-- Market Share
-- OTP Index
-- Date & Time Features
+Features:
+- Flight Delay Prediction
+- Weather Risk Analysis
+- Route Performance Score
+- Downloadable Reports
+- Machine Learning Powered Decision Support
 """)
 
-st.markdown("---")
-
-st.subheader("💡 Tips")
-
-st.info(
-"""
-✔ Select the correct departure and destination airports.
-
-✔ Enter realistic weather values.
-
-✔ Ratings should match the dataset scale used during training.
-
-✔ The prediction is an estimate based on historical data.
-"""
+st.caption(
+    "© 2026 Flight Delay Prediction Dashboard"
 )
-
-st.markdown("---")
-
-st.caption("© 2026 Flight Delay Prediction | Developed using Streamlit & XGBoost")
